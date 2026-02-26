@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outcomes Tracking — Goal Setting</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════ LOGIN ════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-logo">OUTCOMES<span>TRACKING</span></div>
+  <div class="login-tagline">What you can track, you can improve</div>
+
+  <div class="login-card">
+    <h2>Sign In</h2>
+    <div class="role-tabs">
+      <div class="role-tab active" onclick="switchRole('fundraiser')">Fundraiser</div>
+      <div class="role-tab" onclick="switchRole('manager')">Manager</div>
+    </div>
+
+    <div id="login-fundraiser">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="fr-name" placeholder="e.g. Alex Smith">
+      </div>
+      <div class="form-group">
+        <label>Team Code</label>
+        <input type="text" id="fr-team" placeholder="e.g. TEAM01" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label>Week Starting</label>
+        <input type="date" id="fr-week">
+      </div>
+      <button class="btn btn-primary" onclick="loginFundraiser()">START GOAL SETTING →</button>
+    </div>
+
+    <div id="login-manager" style="display:none">
+      <div class="form-group">
+        <label>Manager Name</label>
+        <input type="text" id="mg-name" placeholder="e.g. Jordan Lee">
+      </div>
+      <div class="form-group">
+        <label>Team Code</label>
+        <input type="text" id="mg-team" placeholder="e.g. TEAM01" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label>Manager PIN</label>
+        <input type="password" id="mg-pin" placeholder="4-digit PIN">
+      </div>
+      <button class="btn btn-navy" onclick="loginManager()">OPEN MANAGER PORTAL →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ FUNDRAISER APP ════════════════════════════════ -->
+<div id="screen-fundraiser" class="screen">
+  <div class="app-header">
+    <div class="logo">OT <span>GOALS</span></div>
+    <div class="user-badge" id="fr-badge">Week of <span id="badge-week"></span></div>
+  </div>
+
+  <div class="step-nav" id="step-nav">
+    <div class="step-pill active" data-step="1" onclick="goStep(1)">1. Review Data</div>
+    <div class="step-pill" data-step="2" onclick="goStep(2)">2. Set Goals</div>
+    <div class="step-pill" data-step="3" onclick="goStep(3)">3. Mid-Week</div>
+    <div class="step-pill" data-step="4" onclick="goStep(4)">4. Weekly Review</div>
+  </div>
+
+  <!-- ── STEP 1: REVIEW DATA ── -->
+  <div id="step-1" class="page-content">
+    <div class="page-title">Review Your Data</div>
+    <div class="page-subtitle">Enter your recent stats — this tells us where to focus</div>
+
+    <div class="info-box">
+      <strong>Input = Output.</strong> A true dataset is the best dataset. Fill in your recent numbers honestly — the more accurate this is, the better your goals will be.
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Daily Averages (Recent Data)</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Avg Total Interactions / Day</label>
+          <input type="number" id="avg-interactions" placeholder="e.g. 45" oninput="updateFunnelCalcs()">
+        </div>
+        <div class="form-group">
+          <label>Avg Sign-ups / Day</label>
+          <input type="number" id="avg-signups" placeholder="e.g. 2.5" step="0.1" oninput="updateFunnelCalcs()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Avg Seen Per Day <span class="auto-tag">Track</span></label>
+          <input type="number" id="avg-seen" placeholder="e.g. 38" oninput="updateFunnelCalcs()">
+        </div>
+        <div class="form-group">
+          <label>Target Seen Per Day <span class="auto-tag">Goal</span></label>
+          <input type="number" id="target-seen" placeholder="e.g. 50" oninput="updateFunnelCalcs()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔢 Funnel Conversions <span class="badge badge-teal" id="auto-gap-badge" style="display:none">AUTO-FILLED ✓</span></div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Enter your current % for each step. Your biggest gap will be auto-detected.</p>
+      <div style="overflow-x:auto">
+        <table class="funnel-table" id="funnel-table">
+          <thead>
+            <tr>
+              <th>Funnel Step</th>
+              <th>Your %</th>
+              <th>Standard</th>
+              <th>Gap</th>
+            </tr>
+          </thead>
+          <tbody id="funnel-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎯 My Biggest Gap <span class="auto-tag">AUTO</span></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Focus Area</label>
+          <select id="biggest-gap-select" onchange="syncGapToGoals()">
+            <option value="">— Auto detecting... —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Current %</label>
+          <input type="number" id="gap-current-pct" readonly placeholder="Auto-fills">
+        </div>
+        <div class="form-group">
+          <label>Company Standard</label>
+          <input type="number" id="gap-standard-pct" readonly placeholder="Auto-fills">
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="btn btn-primary" onclick="goStep(2)">NEXT: SET GOALS →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: SET GOALS ── -->
+  <div id="step-2" class="page-content" style="display:none">
+    <div class="page-title">Set Your Goals</div>
+    <div class="page-subtitle">Productivity Goals + Growth Goals for this week</div>
+
+    <div class="card">
+      <div class="card-title">⚡ Productivity Goals</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Daily Interaction Target</label>
+          <input type="number" id="goal-interactions" placeholder="e.g. 50" oninput="calcProjected()">
+        </div>
+        <div class="form-group">
+          <label>Days Working This Week</label>
+          <input type="number" id="goal-days" placeholder="e.g. 5" value="5" oninput="calcProjected()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>LOA Target (1 in X)</label>
+          <input type="number" id="goal-loa" placeholder="e.g. 18" oninput="calcProjected()">
+        </div>
+        <div class="form-group">
+          <label>Projected Sign-ups <span class="auto-tag">CALC</span></label>
+          <input type="number" id="goal-projected" readonly placeholder="Auto-calculated">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 Growth Goal — Focus Area <span class="auto-tag">AUTO</span></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Focus Step</label>
+          <input type="text" id="growth-focus-step" readonly placeholder="Auto-fills from Step 1">
+        </div>
+        <div class="form-group">
+          <label>Current %</label>
+          <input type="number" id="growth-current-pct" readonly placeholder="Auto-fills">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>My Action This Week</label>
+        <input type="text" id="growth-action" placeholder="e.g. Practice my pitch opening 10x per day">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Target % by End of Week</label>
+          <input type="number" id="growth-target-pct" placeholder="e.g. 45">
+        </div>
+        <div class="form-group">
+          <label>Personal Goal (optional)</label>
+          <input type="text" id="growth-personal" placeholder="e.g. Earn $800 this week">
+        </div>
+      </div>
+    </div>
+
+    <div id="goals-summary-box" class="goal-summary" style="display:none">
+      <h3>📋 Weekly Goal Summary</h3>
+      <div id="goals-summary-content"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="btn btn-outline btn-sm" onclick="goStep(1)" style="width:auto;flex-shrink:0">← Back</button>
+      <button class="btn btn-primary" onclick="saveGoals()">SAVE & SUBMIT GOALS →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: MID-WEEK ── -->
+  <div id="step-3" class="page-content" style="display:none">
+    <div class="page-title">Mid-Week Check-In</div>
+    <div class="page-subtitle">How are you tracking? Honest data only.</div>
+
+    <div class="card">
+      <div class="card-title">📅 Mid-Week Numbers</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Days Worked So Far</label>
+          <input type="number" id="mw-days" placeholder="e.g. 3" oninput="calcMidweekPace()">
+        </div>
+        <div class="form-group">
+          <label>Total Interactions So Far</label>
+          <input type="number" id="mw-interactions" placeholder="e.g. 135" oninput="calcMidweekPace()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Sign-ups So Far</label>
+          <input type="number" id="mw-signups" placeholder="e.g. 7" oninput="calcMidweekPace()">
+        </div>
+        <div class="form-group">
+          <label>Current LOA (1 in X)</label>
+          <input type="number" id="mw-loa" placeholder="e.g. 19" oninput="calcMidweekPace()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="mw-pace-card" style="display:none">
+      <div class="card-title">📊 Mid-Week Pace</div>
+      <div class="metric-grid">
+        <div class="metric-box">
+          <div class="val" id="mw-we-pace">–</div>
+          <div class="lbl">WE Pace</div>
+        </div>
+        <div class="metric-box">
+          <div class="val" id="mw-sales-pace">–</div>
+          <div class="lbl">Sales Pace</div>
+        </div>
+        <div class="metric-box">
+          <div class="val" id="mw-projected-total">–</div>
+          <div class="lbl">Projected Signups</div>
+        </div>
+      </div>
+      <div class="pace-bar-wrap">
+        <div class="pace-bar-label"><span>Work Ethic</span><span id="mw-we-label">0%</span></div>
+        <div class="pace-bar-track"><div class="pace-bar-fill" id="mw-we-bar" style="width:0%"></div></div>
+      </div>
+      <div class="pace-bar-wrap" style="margin-top:8px">
+        <div class="pace-bar-label"><span>Sales Pace</span><span id="mw-sales-label">0%</span></div>
+        <div class="pace-bar-track"><div class="pace-bar-fill" id="mw-sales-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💬 Mid-Week Notes</div>
+      <div class="form-group">
+        <label>What's going well?</label>
+        <textarea id="mw-going-well" rows="2" placeholder="e.g. Opening pitch is landing much better"></textarea>
+      </div>
+      <div class="form-group">
+        <label>What needs focus?</label>
+        <textarea id="mw-needs-focus" rows="2" placeholder="e.g. Need to improve close rate"></textarea>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="btn btn-outline btn-sm" onclick="goStep(2)" style="width:auto;flex-shrink:0">← Back</button>
+      <button class="btn btn-primary" onclick="saveMidweek()">SUBMIT MID-WEEK →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: WEEKLY REVIEW ── -->
+  <div id="step-4" class="page-content" style="display:none">
+    <div class="page-title">Weekly Review</div>
+    <div class="page-subtitle">How did the week go? Lock in your data.</div>
+
+    <div class="card">
+      <div class="card-title">📊 Final Numbers</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total Interactions</label>
+          <input type="number" id="wr-interactions" placeholder="e.g. 230" oninput="calcWeeklyReview()">
+        </div>
+        <div class="form-group">
+          <label>Total Sign-ups <span class="auto-tag" id="wr-signups-tag" style="display:none">AUTO</span></label>
+          <input type="number" id="wr-signups" placeholder="e.g. 12" oninput="calcWeeklyReview()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>LOA Actual (1 in X) <span class="auto-tag" id="wr-loa-tag" style="display:none">AUTO</span></label>
+          <input type="number" id="wr-loa" placeholder="Auto-fills from mid-week" oninput="calcWeeklyReview()">
+        </div>
+        <div class="form-group">
+          <label>Days Worked</label>
+          <input type="number" id="wr-days" placeholder="e.g. 5" value="5" oninput="calcWeeklyReview()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="wr-results-card" style="display:none">
+      <div class="card-title">🏁 Week Results vs Goals</div>
+      <div id="wr-results-content"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 Reflection</div>
+      <div class="form-group">
+        <label>What worked this week?</label>
+        <textarea id="wr-worked" rows="2" placeholder="e.g. Consistency in interactions paid off..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>What will I do differently next week?</label>
+        <textarea id="wr-different" rows="2" placeholder="e.g. Focus on getting past the first objection..."></textarea>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="btn btn-outline btn-sm" onclick="goStep(3)" style="width:auto;flex-shrink:0">← Back</button>
+      <button class="btn btn-primary" onclick="saveWeeklyReview()">SUBMIT WEEKLY REVIEW ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ MANAGER PORTAL ════════════════════════════════ -->
+<div id="screen-manager" class="screen">
+  <div class="app-header">
+    <div class="logo">OT <span>MANAGER</span></div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="user-badge">Team: <span id="mg-badge-team"></span></div>
+      <button class="btn btn-sm btn-outline" onclick="logout()" style="color:white;border-color:rgba(255,255,255,0.4);font-size:12px;padding:6px 12px">LOGOUT</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="mgTab('dashboard')">Dashboard</button>
+      <button class="tab-btn" onclick="mgTab('settings')">Team Settings</button>
+    </div>
+
+    <!-- DASHBOARD TAB -->
+    <div id="tab-dashboard" class="tab-panel active">
+      <div class="page-title">Team Dashboard</div>
+      <div class="page-subtitle" id="mg-week-label">Current Week</div>
+
+      <div class="metric-grid" style="margin-bottom:20px">
+        <div class="metric-box">
+          <div class="val" id="mg-total-fundraisers">0</div>
+          <div class="lbl">Fundraisers</div>
+        </div>
+        <div class="metric-box">
+          <div class="val" id="mg-avg-we-pace">–</div>
+          <div class="lbl">Avg WE Pace</div>
+        </div>
+        <div class="metric-box">
+          <div class="val" id="mg-avg-sales-pace">–</div>
+          <div class="lbl">Avg Sales Pace</div>
+        </div>
+      </div>
+
+      <div class="card-title" style="margin-bottom:12px">👥 Fundraiser Overview</div>
+      <div class="manager-grid" id="manager-grid">
+        <div class="alert alert-info">No data submitted yet for this week.</div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" class="tab-panel">
+      <div class="page-title">Team Settings</div>
+      <div class="page-subtitle">Customise funnel step names and standards for your team</div>
+
+      <div class="alert alert-info" style="margin-bottom:16px">
+        These settings flow through to your fundraisers' goal setting sheets. Any changes take effect next time someone logs in.
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔧 Funnel Step Names & Standards</div>
+        <table class="settings-table" id="settings-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Step Name</th>
+              <th>Standard % (Min)</th>
+              <th>Standard % (Max)</th>
+            </tr>
+          </thead>
+          <tbody id="settings-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+        <div style="margin-top:16px">
+          <button class="btn btn-primary btn-sm" onclick="saveSettings()">SAVE SETTINGS ✓</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔑 Manager PIN</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>New PIN (4 digits)</label>
+            <input type="password" id="new-pin" placeholder="0000" maxlength="4">
+          </div>
+          <div class="form-group">
+            <label>Confirm PIN</label>
+            <input type="password" id="confirm-pin" placeholder="0000" maxlength="4">
+          </div>
+        </div>
+        <button class="btn btn-navy btn-sm" onclick="savePIN()">UPDATE PIN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── JavaScript modules (load in dependency order) ── -->
+<script src="js/state.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/fundraiser.js"></script>
+<script src="js/manager.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/utils.js"></script>
+
+</body>
+</html>
