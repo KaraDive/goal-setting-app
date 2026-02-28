@@ -26,7 +26,6 @@ function loginFundraiser() {
   document.getElementById('badge-week').textContent = formatDate(week);
   document.getElementById('fr-badge').innerHTML = `${name} &nbsp;|&nbsp; Week of <span>${formatDate(week)}</span>`;
 
-  buildFunnelTable();
   showScreen('screen-fundraiser');
   goStep(1);
 }

@@ -83,42 +83,22 @@
       <div class="form-row">
         <div class="form-group">
           <label>Avg Total Interactions / Day</label>
-          <input type="number" id="avg-interactions" placeholder="e.g. 45" oninput="updateFunnelCalcs()">
+          <input type="number" id="avg-interactions" placeholder="e.g. 45">
         </div>
         <div class="form-group">
           <label>Avg Sign-ups / Day</label>
-          <input type="number" id="avg-signups" placeholder="e.g. 2.5" step="0.1" oninput="updateFunnelCalcs()">
+          <input type="number" id="avg-signups" placeholder="e.g. 2.5" step="0.1">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>Avg Seen Per Day <span class="auto-tag">Track</span></label>
-          <input type="number" id="avg-seen" placeholder="e.g. 38" oninput="updateFunnelCalcs()">
+          <input type="number" id="avg-seen" placeholder="e.g. 38">
         </div>
         <div class="form-group">
           <label>Target Seen Per Day <span class="auto-tag">Goal</span></label>
-          <input type="number" id="target-seen" placeholder="e.g. 50" oninput="updateFunnelCalcs()">
+          <input type="number" id="target-seen" placeholder="e.g. 50">
         </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🔢 Funnel Conversions <span class="badge badge-teal" id="auto-gap-badge" style="display:none">AUTO-FILLED ✓</span></div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Enter your current % for each step. Your biggest gap will be auto-detected.</p>
-      <div style="overflow-x:auto">
-        <table class="funnel-table" id="funnel-table">
-          <thead>
-            <tr>
-              <th>Funnel Step</th>
-              <th>Your %</th>
-              <th>Standard</th>
-              <th>Gap</th>
-            </tr>
-          </thead>
-          <tbody id="funnel-body">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
       </div>
     </div>
 
